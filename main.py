@@ -1,6 +1,7 @@
 import os
 import sqlite3
 
+# Define the directory and database name
 DIRECTORY= "."
 DBNAME= "contacts.db"
 DB= os.path.join(DIRECTORY, DBNAME)
@@ -8,21 +9,26 @@ DEFAULT= "SELECT * FROM CONTACTS"
 CONN = sqlite3.connect(DBNAME)
 CUR = CONN.cursor()
 
+# Function to execute a SELECT statement
+# Should be moved to Functions.py file
 def select(cursor=CUR, select_statement=DEFAULT):
     result = cur.execute(select_statement)
     return result
 
-
+# Function to execute an INSERT statement
+# Should be moved to Functions.py file
 def insert(cursor=CUR, insert_statement=DEFAULT):
     result = cur.execute(insert_statement)
     return result
 
-
+# Function to execute an UPDATE statement
+# Should be moved to Functions.py file
 def update(cursor=CUR, update_statement=DEFAULT):
     result = cur.execute(update_statement)
     return result
 
-
+# Function to execute a DELETE statement
+# Should be moved to Functions.py file
 def delete(cursor=CUR, delete_statement=DEFAULT):
     result = cur.execute(delete_statement)
     return result
@@ -39,14 +45,15 @@ def print_contact_records(records=None):
         print(f"Id:{record[0]}\tName: {record[1]},\tAge: {record[2]}\tPhone Number: {record[3]}\tLocation: {record[4]}")
     print("\n")
 
-
+# Function to print menu options
+# Should be moved to Cli.py file
 def print_menu_options(options):
     print("\n\n")
     for option_id, option in options.items():
         print(f"\t{option_id}: {option['desc']}")
 
 
-
+# Main function to run the script
 if __name__ == "__main__":
     os.system('cls' if os.name == 'nt' else 'clear')
     menu = {
