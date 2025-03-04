@@ -3,7 +3,7 @@ import sqlite3
 
 
 # def connect_db(directory=".",db_name=None):
-#     if (not db_name):
+#CREATE TABLE IF NOT EXISTS     if (not db_name):
 # db_name = input(f">>> Write the name of the database you wish to connect: ")
 #    try:
 #        file_path = os.path.join(directory, db_name)
@@ -47,20 +47,31 @@ import sqlite3
 #    return result
 #
 #
-#def print_contact_records(records=None):
-#    print("+++ Contacts +++")
-#    for record in records:
-#        print(f"Id:{record[0]}\tName: {record[1]},\tAge: {record[2]}\tPhone Number: {record[3]}\tLocation: {record[4]}")
-#    print("\n")
-#
-#
-#def print_menu_options(options):
-#    print("\n\n")
-#    for option_id, option in options.items():
-#        print(f"\t{option_id}: {option['desc']}")
-#
+
+def column_width_text(value):
+    return str(value).ljust(20)
+    
 
 
+def print_contact_records(cur):
+    result = cur.execute("SELECT * FROM CONTACTS;")
+    column_names = [column_width_text(description[0]) for description in result.description]
+    print("+++ Contacts +++")
+    print(f"|{column_names[0]}|{column_names[1]}|{column_names[2]}|{column_names[3]}|{column_names[4]}")
+    records = result.fetchall()
+    if (not records):
+        print("   NO RECORDS FOUND   ")
+    else:
+        for record in records:
+            record = [column_width_text(value) for value in record] 
+            print(f" {record[0]} {record[1]} {record[2]}, {record[3]}, {record[4]}")
+    print("\n\n")
+
+
+def print_menu_options(options):
+    print("\n\n")
+    for option_id, option in options.items():
+        print(f"\t{option_id}: {option['desc']}")
 
 
 def initialize_db(db=None):
@@ -86,17 +97,33 @@ def initialize_db(db=None):
         assert(os.path.exists(db['filepath'], ))
     except (AssertionError):
         print(f"\tFailure! Unable to create/connect to db.")
-    
-        conn = sqlite3.connect(default_db['filepath'])
-        
-
+    conn = sqlite3.connect(default_db['filepath'])
+    cur = conn.cursor()
+    cur.execute(default_db['delete_statement'])
+    cur.execute(default_db['create_statement'])
+    cur.execute(default_db['insert_statement'])
+    conn.commit()
+    return conn
 
 if __name__ == "__main__":
+    DIRECTORY="."
+    DBNAME="contacts.db"
+    TABLENAME="CONTACTS"
+    FILEPATH=os.path.join(DIRECTORY, DBNAME)
+    DELETE_STATEMENT=f"DROP TABLE {TABLENAME}" 
+    CREATE_STATEMENT=f"CREATE TABLE IF NOT EXISTS {TABLENAME} (contactid INTEGER PRIMARY KEY ASC,\
+                                                      name TEXT,\
+                                                      age INTEGER,\
+                                                      phonenumber INTEGER,\
+                                                      location TEXT);"
+    INSERT_STATEMENT=f"INSERT INTO {TABLENAME} (name, age, phonenumber, location) VALUES ('Daniel', 35, 5555551212, 'Las Vegas'),( 'Dennis', 27, 1234567890, 'New York'),( 'Keegan', 39, 4569876543, 'New York'), ( 'Neil', 58, 5551112222, 'New York'), ( 'Matt', 32, 1233334444, 'New York'), ('Alice', 25, 1234567890, 'New York'),( 'Heather', 50, 5557778888, 'New York'), ('John', 21, 1239990000, 'New York'), ('Amanda', 36, 4562223333, 'New York'), ('Zach', 22, 5554445555, 'New York');"
     default_db= {
-        'directory': ".",
-        'name': "contacts.db",
-        'filepath': './toDELETE_contacts.db',
-        'insert_statement' : "INSERT INTO CONTACTS (contact_id, name, age, phonenumber, location) VALUES ('0', 'Daniel', 35, 5555551212, 'Las Vegas'),('2', 'Dennis', 27, 1234567890, 'New York'),('3', 'Keegan', 39, 4569876543, 'New York'), ('4', 'Neil', 58, 5551112222, 'New York'), ('5', 'Matt', 32, 1233334444, 'New York'), ('6', 'Alice', 25, 1234567890, 'New York'),('7', 'Heather', 50, 5557778888, 'New York'), ('8', 'John', 21, 1239990000, 'New York'), ('9', 'Amanda', 36, 4562223333, 'New York'), ('10', 'Zach', 22, 5554445555, 'New York');"
+        'directory': DIRECTORY,
+        'name': DBNAME,
+        'filepath': FILEPATH,
+        'delete_statement' : DELETE_STATEMENT,
+        'create_statement' : CREATE_STATEMENT,
+        'insert_statement' : INSERT_STATEMENT,
     }
 
     menu = {
@@ -106,13 +133,11 @@ if __name__ == "__main__":
 #        3: {"func": update, "desc": "Update"},
 #        4: {"func": delete, "desc": "Delete"},
     }
-    
-    initialize_db(default_db)
-    os.system('cls' if os.name == 'nt' else 'clear')
+    conn = initialize_db(default_db)
+#    os.system('cls' if os.name == 'nt' else 'clear')
 
-
-
-    print_contact_records(column_names='(*)', )
+    with conn:
+        print_contact_records(conn.cursor())
 #    print_menu_options(menu)
 #    build_sql_cmd(menu[]['desc'] )
 
