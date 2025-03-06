@@ -2,10 +2,10 @@ import os
 import sqlite3
 
 
+
 ####################
 # DATABASE FUNCTIONS
 ####################
-
 
 def select(cursor, select_statement):
     result = cursor.execute(select_statement)
@@ -18,7 +18,7 @@ def insert(cursor, insert_statement):
 
 
 def update(cursor, update_statement):
-    result = cursor.execute(update_statement)
+    result = cursor.execute(update_statement
     return result
 
 
@@ -82,8 +82,10 @@ def print_contact_records(cur):
             print(f"\t {record[0]} {record[1]} {record[2]} {record[3]} {record[4]}")
     print("\n\n")
 
-
+    
 def prompt_menu(options):
+# Function to print menu options
+# Should be moved to Cli.py file
     print("\n\n")
     print(">>> menu")
     for option_id, option in options.items():
@@ -95,6 +97,7 @@ def prompt_menu(options):
 ####################
 # MAIN
 ####################
+                            
 def main():
     DIRECTORY="."
     DBNAME="contacts.db"
