@@ -33,6 +33,13 @@ def initialize_db(db):
     while(not isinstance(db, dict)):
         print("\tdatabase was not supplied.\n\tplease select another database to initialize or choose to create a new database.")
         database_names = [f for f in os.listdir('.') if ((os.path.isfile(f)) and (os.path.splitext(f)[1] == ".db"))] 
+<<<<<<< HEAD
+        for f in os.listdir('.'):
+            if ((os.path.isfile(f)) and (os.path.splitext(f)[1] == ".db")):
+                print(database_names)
+
+=======
+>>>>>>> 34bd0acfc213eef96bc4f1d548db12f3d171be74
         if (database_nanmes):
             print("\tdatabases found in '.' directory:")
             for db_name in database_names:
@@ -175,4 +182,8 @@ def main():
 
 
 if __name__ == "__main__":
+<<<<<<< HEAD
     main()
+=======
+    main()
+>>>>>>> 34bd0acfc213eef96bc4f1d548db12f3d171be74
