@@ -1,102 +1,182 @@
 import os
 import sqlite3
 
-# Define the directory and database name
-DIRECTORY= "."
-DBNAME= "contacts.db"
-DB= os.path.join(DIRECTORY, DBNAME)
-DEFAULT= "SELECT * FROM CONTACTS"
-CONN = sqlite3.connect(DBNAME)
-CUR = CONN.cursor()
 
-# Function to execute a SELECT statement
-# Should be moved to Functions.py file
-def select(cursor=CUR, select_statement=DEFAULT):
-    result = cur.execute(select_statement)
-    return result
 
-# Function to execute an INSERT statement
-# Should be moved to Functions.py file
-def insert(cursor=CUR, insert_statement=DEFAULT):
-    result = cur.execute(insert_statement)
-    return result
+####################
+# DATABASE FUNCTIONS
+####################
 
-# Function to execute an UPDATE statement
-# Should be moved to Functions.py file
-def update(cursor=CUR, update_statement=DEFAULT):
-    result = cur.execute(update_statement)
-    return result
-
-# Function to execute a DELETE statement
-# Should be moved to Functions.py file
-def delete(cursor=CUR, delete_statement=DEFAULT):
-    result = cur.execute(delete_statement)
+def select(cursor, select_statement):
+    result = cursor.execute(select_statement)
     return result
 
 
-def commit(conn=CONN):
-    result = conn.commit()
+def insert(cursor, insert_statement):
+    result = cursor.execute(insert_statement)
     return result
+
+
+def update(cursor, update_statement):
+    result = cursor.execute(update_statement
+    return result
+
+
+def delete(cursor, delete_statement):
+    result = cursor.execute(delete_statement)
+    return result
+
+
+def initialize_db(db):
+    print(">>> initialize db")
+    print("checking supplied database...")
+    while(not isinstance(db, dict)):
+        print("\tdatabase was not supplied.\n\tplease select another database to initialize or choose to create a new database.")
+        database_names = [f for f in os.listdir('.') if ((os.path.isfile(f)) and (os.path.splitext(f)[1] == ".db"))] 
+        for f in os.listdir('.'):
+            if ((os.path.isfile(f)) and (os.path.splitext(f)[1] == ".db")):
+                print(database_names)
+
+        if (database_nanmes):
+            print("\tdatabases found in '.' directory:")
+            for db_name in database_names:
+                print(f"\t\t{db_name}\n")
+        else:
+            print("\tunable to locate database (.db) in directory.\n\tplease select a different directory or choose to create a new database.")
+            db=default_db
+    try:
+        assert isinstance(db, dict), "bad db, not dictionary"
+        assert os.path.exists(db['filepath']), "bad filepath, does not exist"
+        print("\tconfirmed, supplied database file is located")
+    except (AssertionError):
+        print(f"\tunsuccessful, supplied database file was not located")
+    conn = sqlite3.connect(db['filepath'])
+    cur = conn.cursor()
+    cur.execute(db['droptable_statement'])
+    cur.execute(db['createtable_statement'])
+    cur.execute(db['initial_insert_statement'])
+    conn.commit()
+    return conn
+
+
+
+####################
+# HELPER FUNCTIONS
+####################
+
+def column_width_text(value):
+    return str(value).ljust(20)
+
+
+def print_contact_records(cur):
+    result = cur.execute("SELECT * FROM CONTACTS;")
+    column_names = [column_width_text(description[0]) for description in result.description]
+    print(">>> contacts")
+    print(f"\t|{column_names[0]}|{column_names[1]}|{column_names[2]}|{column_names[3]}|{column_names[4]}")
+    records = result.fetchall()
+    if (not records):
+        print("\t   NO RECORDS FOUND   ")
+    else:
+        for record in records:
+            record = [column_width_text(value) for value in record] 
+            print(f"\t {record[0]} {record[1]} {record[2]} {record[3]} {record[4]}")
+    print("\n\n")
+
     
-
-def print_contact_records(records=None):
-    print("+++ Contacts +++")
-    for record in records:
-        print(f"Id:{record[0]}\tName: {record[1]},\tAge: {record[2]}\tPhone Number: {record[3]}\tLocation: {record[4]}")
-    print("\n")
-
+def prompt_menu(options):
 # Function to print menu options
 # Should be moved to Cli.py file
-def print_menu_options(options):
     print("\n\n")
+    print(">>> menu")
     for option_id, option in options.items():
         print(f"\t{option_id}: {option['desc']}")
+    return input(">>> Enter menu option:\n>>> ")
 
 
-# Main function to run the script
-if __name__ == "__main__":
-    os.system('cls' if os.name == 'nt' else 'clear')
+
+####################
+# MAIN
+####################
+                            
+def main():
+    DIRECTORY="."
+    DBNAME="contacts.db"
+    FILEPATH=os.path.join(DIRECTORY, DBNAME)
+    TABLENAME="CONTACTS"
+    COLUMNNAMES="name,age,phonenumber,location"
+    DROPTABLE_STATEMENT=f"DROP TABLE {TABLENAME}" 
+    CREATETABLE_STATEMENT=f"CREATE TABLE IF NOT EXISTS {TABLENAME} (contactid INTEGER PRIMARY KEY ASC,\
+                                                      name TEXT,\
+                                                      age INTEGER,\
+                                                      phonenumber INTEGER,\
+                                                      location TEXT);"
+    INITIAL_INSERT_STATEMENT=f"INSERT INTO {TABLENAME} ({COLUMNNAMES}) "+\
+        "VALUES " +\
+        "('Daniel', 35, 5555551212, 'Las Vegas'), "+\
+        "('Dennis', 27, 1234567890, 'New York'), "+\
+        "('Keegan', 39, 4569876543, 'New York'), "+\
+        "('Neil', 58, 5551112222, 'New York'), "+\
+        "('Matt', 32, 1233334444, 'New York'), "+\
+        "('Alice', 25, 1234567890, 'New York'), "+\
+        "('Heather', 50, 5557778888, 'New York'), "+\
+        "('John', 21, 1239990000, 'New York'), "+\
+        "('Amanda', 36, 4562223333, 'New York'), "+\
+        "('Zach', 22, 5554445555, 'New York');"
+    SELECT_STATEMENT=f"SELECT {COLUMNNAMES} FROM {TABLENAME};"
+    INSERT_STATEMENT=f"INSERT INTO {TABLENAME} ({COLUMNNAMES}) VALUES ('Gene', 94, 3456789234, 'San Bernadino');"
+    UPDATE_STATEMENT=f"UPDATE {TABLENAME} "+\
+        "SET name = 'Brandon',"+\
+            "age = 43,"+\
+            "phonenumber = 5459891123,"+\
+            "location = 'Las Vegas' "+\
+        "WHERE name = 'Gene';"
+    DELETE_STATEMENT=f"DELETE FROM {TABLENAME} WHERE name='Brandon';"
+    default_db= {
+        'directory': DIRECTORY,
+        'name': DBNAME,
+        'filepath': FILEPATH,
+        'droptable_statement' : DROPTABLE_STATEMENT,
+        'createtable_statement' : CREATETABLE_STATEMENT,
+        'initial_insert_statement' : INITIAL_INSERT_STATEMENT,
+        'select_statement' : SELECT_STATEMENT,
+        'insert_statement' : INSERT_STATEMENT,
+        'update_statement' : UPDATE_STATEMENT,
+        'delete_statement' : DELETE_STATEMENT
+    }
     menu = {
-        0: {"func": exit, "desc": "Exit"},
-        1: {"func": select, "desc": "Select"},
-        2: {"func": insert, "desc": "Insert"},
-        3: {"func": update, "desc": "Update"},
-        4: {"func": delete, "desc": "Delete"},
-    }          
-    try:
-        # Check if the file exists at the specified path.
-        assert(os.path.exists(DB),)
-        conn = sqlite3.connect(DB)
-        cur = conn.cursor()
-        while(menu):
-            result = cur.execute("SELECT * FROM CONTACTS")
-            records = result.fetchall()
-            print_contact_records(records)
-            
-            print_menu_options(menu)
-            
-            user_input = input(f">>> Enter your choice from 0-{len(menu)-1}: ")
-            print("\tUser selected: " + user_input)
+        0: {"func": exit, "sql_statement":None, "desc": "Exit"},
+        1: {"func": select,"sql_statement":default_db["select_statement"], "desc": "Select"},
+        2: {"func": insert,"sql_statement":default_db["insert_statement"], "desc": "Insert"},
+        3: {"func": update,"sql_statement":default_db["update_statement"], "desc": "Update"},
+        4: {"func": delete,"sql_statement":default_db["delete_statement"], "desc": "Delete"},
+    }
+    conn = initialize_db(default_db)
+    choice = None
 
-            try:
-                user_choice = int(user_input)
-                if ((user_choice < 0) or (user_choice >= len(menu))):
-                    raise ValueError('*** Invalid input:', user_choice)
-                elif (user_choice == 0):
-                    break
-                if callable(menu[user_choice]["func"]):
-                    sql_statement = None
-                    while(not sql_statement):
-                        sql_statement = input(f">>> Enter SQL {menu[user_choice]['desc']} statement: ")
-                        results = menu[user_choice]["func"](cur, sql_statement)
-            except ValueError as ve:
-                print(f"*** Invalid input. Please select from the available options. {ve}\n\n")      
+    while(choice != 0):
+        print_contact_records(conn.cursor())
+        user_input = prompt_menu(menu) 
+        choice = int(user_input or 0)
+        print("\tuser selected... \'" + user_input + "\'")
+        #os.system('cls' if os.name == 'nt' else 'clear')
 
-    except (AssertionError):
-        print(f"\tFailure! Unable to create/connect to db: {DBNAME}\n")    
-        
+        try:
+            if ((choice <= 0) or (choice >= len(menu))):
+                raise ValueError(f'invalid input:, {choice}')
+            else:
+                menu[choice]["func"](conn.cursor(), menu[choice]["sql_statement"])
+        except ValueError as ve:
+            print(f">>> invalid input. Please select from the available options. {ve}")
 
-#sql_statement = "CREATE TABLE CONTACTS(contact_id INTEGER PRIMARY KEY ASC, name, age, phonenumber, location);"
-#sql_statement = "INSERT INTO CONTACTS (contact_id, name, age, phonenumber, location) VALUES ('1', 'Daniel', 35, 5555551212, 'Las Vegas'),('2', 'Dennis', 27, 1234567890, 'New York'),('3', 'Keegan', 39, 4569876543, 'New York'), ('4', 'Neil', 58, 5551112222, 'New York'), ('5', 'Matt', 32, 1233334444, 'New York'), ('6', 'Alice', 25, 1234567890, 'New York'),('7', 'Heather', 50, 5557778888, 'New York'), ('8', 'John', 21, 1239990000, 'New York'), ('9', 'Amanda', 36, 4562223333, 'New York'), ('10', 'Zach', 22, 5554445555, 'New York');"
-#sql_statement = "INSERT INTO CONTACTS (name, age, phonenumber, location) VALUES ('Gene', 95, 3456789234, 'San Bernadino');"
+    print(">>> closing connection....")
+    try: 
+        conn.close()
+        print("\tsuccess, closed connection.")
+    except e:
+        print("\tfailure, connection closed with error" \
+            "\n>>> error\n" + e)
+    print(">>> exiting...")
 
+
+if __name__ == "__main__":
+    main()
