@@ -2,7 +2,6 @@ import os
 import sqlite3
 
 
-
 ####################
 # DATABASE FUNCTIONS
 ####################
@@ -18,7 +17,7 @@ def insert(cursor, insert_statement):
 
 
 def update(cursor, update_statement):
-    result = cursor.execute(update_statement
+    result = cursor.execute(update_statement)
     return result
 
 
@@ -33,13 +32,10 @@ def initialize_db(db):
     while(not isinstance(db, dict)):
         print("\tdatabase was not supplied.\n\tplease select another database to initialize or choose to create a new database.")
         database_names = [f for f in os.listdir('.') if ((os.path.isfile(f)) and (os.path.splitext(f)[1] == ".db"))] 
-<<<<<<< HEAD
         for f in os.listdir('.'):
             if ((os.path.isfile(f)) and (os.path.splitext(f)[1] == ".db")):
                 print(database_names)
 
-=======
->>>>>>> 34bd0acfc213eef96bc4f1d548db12f3d171be74
         if (database_nanmes):
             print("\tdatabases found in '.' directory:")
             for db_name in database_names:
@@ -85,10 +81,8 @@ def print_contact_records(cur):
             print(f"\t {record[0]} {record[1]} {record[2]} {record[3]} {record[4]}")
     print("\n\n")
 
-    
+
 def prompt_menu(options):
-# Function to print menu options
-# Should be moved to Cli.py file
     print("\n\n")
     print(">>> menu")
     for option_id, option in options.items():
@@ -100,7 +94,6 @@ def prompt_menu(options):
 ####################
 # MAIN
 ####################
-                            
 def main():
     DIRECTORY="."
     DBNAME="contacts.db"
@@ -182,8 +175,4 @@ def main():
 
 
 if __name__ == "__main__":
-<<<<<<< HEAD
     main()
-=======
-    main()
->>>>>>> 34bd0acfc213eef96bc4f1d548db12f3d171be74
